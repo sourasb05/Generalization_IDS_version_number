@@ -29,10 +29,18 @@ from scipy import stats
 # ── Paths ──────────────────────────────────────────────────────────────────────
 BASE    = os.path.join(os.path.dirname(__file__), "attack_data")
 XLSX    = os.path.join(os.path.dirname(__file__), "domain_details.xlsx")
+CSV     = os.path.join(os.path.dirname(__file__), "domain_details.csv")
 OUT_DIR = os.path.join(os.path.dirname(__file__), "analysis_output")
 
 # ── Load domain metadata ───────────────────────────────────────────────────────
-meta = pd.read_excel(XLSX)
+meta = None
+if os.path.exists(XLSX):
+    meta = pd.read_excel(XLSX)
+elif os.path.exists(CSV):
+    meta = pd.read_csv(CSV)
+if meta is None:
+    raise FileNotFoundError("Error: Could not find domain_details file")
+
 meta.columns = meta.columns.str.strip()
 meta["Domain Name"] = meta["Domain Name"].str.strip().str.lower()
 meta["Attack Type"] = meta["Attack Type"].str.strip().str.lower().str.replace(" ", "_")
@@ -42,12 +50,20 @@ meta["Node"]        = meta["Node"].astype(int)
 # ── Styling ────────────────────────────────────────────────────────────────────
 COLORS     = {0: "#2196F3", 1: "#F44336"}
 LABEL_NAME = {0: "Normal",  1: "Attack"}
-FEATURES   = ["tx", "rx", "tx.1", "rx.1"]
+FEATURES = ["rank", "dior", "dios", "diar", "tots",
+            "rank.1", "dior.1", "dios.1", "diar.1", "tots.1"]
+
 FEAT_TITLE = {
-    "tx":   "TX (mean)",
-    "rx":   "RX (mean)",
-    "tx.1": "TX (std)",
-    "rx.1": "RX (std)",
+    "rank": "Rank (mean)",
+    "dior": "DIO Recieved (mean)",
+    "dios": "DIO Sent (mean)",
+    "diar": "DIA Recieved (mean)",
+    "tots": "Total Sent (mean)",
+    "rank.1": "Rank (std)",
+    "dior.1": "DIO Recieved (std)",
+    "dios.1": "DIO Sent (std)",
+    "diar.1": "DIA Recieved (std)",
+    "tots.1": "Total Sent (std)",
 }
 
 ATTACK_DISPLAY = {
@@ -56,14 +72,13 @@ ATTACK_DISPLAY = {
     "failing_node": "Failing Node",
     "local_repair": "Local Repair",
     "worst_parent": "Worst Parent",
+    "version_number": "Version Number",
 }
 
 # ── Helper: compute features for a single CSV ─────────────────────────────────
 def compute_features(path):
     df = pd.read_csv(path, index_col=0)
-    # tx   = mean TX across nodes,  rx   = mean RX across nodes
-    # tx.1 = std  TX across nodes,  rx.1 = std  RX across nodes
-    df = df[["tx", "rx", "tx.1", "rx.1", "label"]].copy()
+    df = df[[*FEATURES, "label"]].copy()
     return df
 
 # ── Helper: averaged KDE across independent experiments ───────────────────────
@@ -113,7 +128,7 @@ def global_range(csv_list, feat):
 
 # ── Helper: plot aggregated distributions for one domain ──────────────────────
 def plot_domain(csv_list, domain, attack_type, node, version, out_path):
-    fig, axes = plt.subplots(1, 4, figsize=(20, 5))
+    fig, axes = plt.subplots(2, 5, figsize=(25, 10))
     axes = axes.flatten()
     # fig.suptitle(
     #    f"{ATTACK_DISPLAY.get(attack_type, attack_type)} |  "

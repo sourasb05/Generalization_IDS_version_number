@@ -52,12 +52,8 @@ def extract_index(path):
 DROP_COLS = ["Unnamed: 0", "cpu", "cpu.1"]
 
 EXPERIMENT_FEATURES = {
-    1: None,  # all 18 features
-    2: ["tx", "rx", "tx.1", "rx.1"],
-    3: ["rank", "disr", "diss", "dior", "dios", "diar", "tots", "tx",
-        "rank.1", "disr.1", "diss.1", "dior.1", "dios.1", "diar.1", "tots.1", "tx.1"],
-    4: ["rank", "disr", "diss", "dior", "dios", "diar", "tots", "rx",
-        "rank.1", "disr.1", "diss.1", "dior.1", "dios.1", "diar.1", "tots.1", "rx.1"],
+    1: None,  # all 14 features
+    2: ["dior", "dios", "dior.1", "dios.1"],
 }
 
 def load_csv(path, feature_cols=None):
@@ -162,8 +158,17 @@ def load_data(domain_path, domain_dataset, window_size=10, batch_size=128, featu
 def create_domains(domains_path):
     import pandas as pd
 
-    details_path = os.path.join(os.path.dirname(domains_path), "domain_details.xlsx")
-    df = pd.read_excel(details_path)
+    details_path_xlsx = os.path.join(os.path.dirname(domains_path), "domain_details.xlsx")
+    details_path_csv = os.path.join(os.path.dirname(domains_path), "domain_details.csv")
+
+    df = None
+    if os.path.exists(details_path_xlsx):
+        df = pd.read_excel(details_path_xlsx)
+    elif os.path.exists(details_path_csv):
+        df = pd.read_csv(details_path_csv)
+    if df is None:
+        raise FileNotFoundError("Could not find details file")
+
     df.columns = df.columns.str.strip()
     df["Domain Name"] = df["Domain Name"].str.strip()
     df["Attack Type"] = df["Attack Type"].str.strip().str.replace(" ", "_")

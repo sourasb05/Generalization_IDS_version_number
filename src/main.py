@@ -38,7 +38,7 @@ def main():
     logging.getLogger('').addHandler(console)
 
     feature_cols = utils.EXPERIMENT_FEATURES[exp_no]
-    num_features = len(feature_cols) if feature_cols is not None else 18
+    num_features = len(feature_cols) if feature_cols is not None else 14
     input_size = num_features * args.window_size
 
     logging.info(f"Experiment {exp_no} | num_features={num_features} | input_size={input_size}")

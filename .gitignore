@@ -1,6 +1,4 @@
 # Data
-attack_data/
-*.csv
 *.xlsx
 
 # Models
@@ -15,6 +13,7 @@ logs/
 # Results
 src/results/
 results/
+analysis_output/
 
 # Python
 __pycache__/

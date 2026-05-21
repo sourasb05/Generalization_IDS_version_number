@@ -226,7 +226,7 @@ def main():
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
     feature_cols = utils.EXPERIMENT_FEATURES[exp_no]
-    num_features = len(feature_cols) if feature_cols is not None else 18
+    num_features = len(feature_cols) if feature_cols is not None else 14
     input_size = num_features * args.window_size
 
     domains_path = os.path.join(os.path.dirname(current_dir), 'attack_data')
